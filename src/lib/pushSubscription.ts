@@ -98,10 +98,8 @@ export async function subscribeToPush(
   }
 
   // 3. VAPID public key'ini al
-  const vapidKey = import.meta.env.VITE_VAPID_PUBLIC_KEY as string | undefined;
-  if (!vapidKey) {
-    console.warn('[pushSubscription] VITE_VAPID_PUBLIC_KEY tanımlı değil!');
-  }
+  const DEFAULT_VAPID_PUBLIC_KEY = 'BArPk-kRQ64Pm4rOr-GcnRHEWN6XvXBD5aKcWGG4ZjSMbhbP1tTV2QCHe5UqVpFKuAf6a4zRLMIjQcJiXeYFYO8';
+  const vapidKey = (import.meta.env.VITE_VAPID_PUBLIC_KEY as string | undefined) || DEFAULT_VAPID_PUBLIC_KEY;
 
   try {
     // 4. SW kaydını al/oluştur

@@ -22,14 +22,24 @@ import { supabase } from './supabase';
 
 // ─── Firebase Konfigürasyonu ──────────────────────────────────────────────────
 
+const DEFAULT_FIREBASE_CONFIG = {
+  apiKey:            'AIzaSyBh7HPxLVWQ-a2LbPWVHP0lku-CjJBcCcM',
+  authDomain:        'gunluk-gorev.firebaseapp.com',
+  projectId:         'gunluk-gorev',
+  storageBucket:     'gunluk-gorev.firebasestorage.app',
+  messagingSenderId: '38032682936',
+  appId:             '1:38032682936:web:43ea47833602f9f8dae94d',
+  measurementId:     'G-FPQVNKWF0M',
+};
+
 const firebaseConfig = {
-  apiKey:            import.meta.env.VITE_FIREBASE_API_KEY            as string,
-  authDomain:        import.meta.env.VITE_FIREBASE_AUTH_DOMAIN        as string,
-  projectId:         import.meta.env.VITE_FIREBASE_PROJECT_ID         as string,
-  storageBucket:     import.meta.env.VITE_FIREBASE_STORAGE_BUCKET     as string,
-  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID as string,
-  appId:             import.meta.env.VITE_FIREBASE_APP_ID             as string,
-  measurementId:     import.meta.env.VITE_FIREBASE_MEASUREMENT_ID     as string | undefined,
+  apiKey:            (import.meta.env.VITE_FIREBASE_API_KEY as string | undefined) || DEFAULT_FIREBASE_CONFIG.apiKey,
+  authDomain:        (import.meta.env.VITE_FIREBASE_AUTH_DOMAIN as string | undefined) || DEFAULT_FIREBASE_CONFIG.authDomain,
+  projectId:         (import.meta.env.VITE_FIREBASE_PROJECT_ID as string | undefined) || DEFAULT_FIREBASE_CONFIG.projectId,
+  storageBucket:     (import.meta.env.VITE_FIREBASE_STORAGE_BUCKET as string | undefined) || DEFAULT_FIREBASE_CONFIG.storageBucket,
+  messagingSenderId: (import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID as string | undefined) || DEFAULT_FIREBASE_CONFIG.messagingSenderId,
+  appId:             (import.meta.env.VITE_FIREBASE_APP_ID as string | undefined) || DEFAULT_FIREBASE_CONFIG.appId,
+  measurementId:     (import.meta.env.VITE_FIREBASE_MEASUREMENT_ID as string | undefined) || DEFAULT_FIREBASE_CONFIG.measurementId,
 };
 
 // Singleton: Uygulama zaten başlatılmışsa mevcut instance'ı kullan
@@ -139,12 +149,8 @@ export async function getFCMToken(userId?: string | null): Promise<FCMTokenResul
   }
 
   // 4. VAPID key varlık kontrolü
-  const vapidKey = import.meta.env.VITE_FIREBASE_VAPID_KEY as string | undefined;
-  if (!vapidKey) {
-    const msg = 'VITE_FIREBASE_VAPID_KEY .env dosyasında tanımlı değil!';
-    console.error('[firebase]', msg);
-    return { ok: false, reason: 'vapid_missing', message: msg };
-  }
+  const DEFAULT_FIREBASE_VAPID_KEY = 'BJ1JXt4rzbPWgP5HMwmORGtMPfoOpcVNnWBbNlu7PBg1raaHP4bbuoeHcKxIYKfvq3tIvXYnIphS7IG0p48w_uY';
+  const vapidKey = (import.meta.env.VITE_FIREBASE_VAPID_KEY as string | undefined) || DEFAULT_FIREBASE_VAPID_KEY;
 
   // 5. FCM token al
   let token: string;
@@ -279,13 +285,8 @@ export async function checkAndSaveFCMToken(
     }
 
     // VAPID key
-    const vapidKey = import.meta.env.VITE_FIREBASE_VAPID_KEY as string | undefined;
-    if (!vapidKey) {
-      const msg = 'VITE_FIREBASE_VAPID_KEY .env dosyasında tanımlı değil!';
-      console.error('[firebase]', msg);
-      onError?.(msg);
-      return;
-    }
+    const DEFAULT_FIREBASE_VAPID_KEY = 'BJ1JXt4rzbPWgP5HMwmORGtMPfoOpcVNnWBbNlu7PBg1raaHP4bbuoeHcKxIYKfvq3tIvXYnIphS7IG0p48w_uY';
+    const vapidKey = (import.meta.env.VITE_FIREBASE_VAPID_KEY as string | undefined) || DEFAULT_FIREBASE_VAPID_KEY;
 
     // FCM token al
     const rawToken = await getToken(messaging, {

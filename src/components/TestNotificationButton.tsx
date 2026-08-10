@@ -13,8 +13,9 @@
  */
 
 import { useState } from 'react';
-import { Send, CheckCircle2, XCircle, Loader2 } from 'lucide-react';
+import { Send, CheckCircle2, XCircle, Loader2, RefreshCw } from 'lucide-react';
 import { supabase } from '../lib/supabase';
+import { getFCMToken } from '../lib/firebase';
 
 // ─── Toast Tipi ──────────────────────────────────────────────────────────────
 
@@ -35,18 +36,13 @@ export function TestNotificationButton() {
     // ── En dış try-catch: ağ, CORS veya JS hatalarını yakalar ─────────────
     try {
       // ── 0. Ortam değişkenini doğrula ──────────────────────────────────────
-      const supabaseUrl = import.meta.env.VITE_SUPABASE_URL as string | undefined;
-
-      if (!supabaseUrl) {
-        const msg = 'VITE_SUPABASE_URL tanımlı değil! .env dosyasını kontrol et.';
-        console.error('[TestNotif] ❌', msg);
-        setToast({ type: 'error', message: msg });
-        return;
-      }
+      const DEFAULT_SUPABASE_URL = 'https://ooeowjpmoxjzxtwqwvtk.supabase.co';
+      const supabaseUrl = (import.meta.env.VITE_SUPABASE_URL as string | undefined) || DEFAULT_SUPABASE_URL;
 
       // ── 1. Oturum token'ını al ─────────────────────────────────────────────
       console.log('[TestNotif] Oturum alınıyor...');
       let accessToken: string;
+      let userId: string | null = null;
 
       try {
         const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
@@ -59,12 +55,24 @@ export function TestNotificationButton() {
         }
 
         accessToken = sessionData.session.access_token;
-        console.log('[TestNotif] ✅ Oturum doğrulandı.');
+        userId = sessionData.session.user.id;
+        console.log('[TestNotif] ✅ Oturum doğrulandı. User ID:', userId);
       } catch (sessionErr) {
         const msg = `Oturum alma hatası: ${sessionErr instanceof Error ? sessionErr.message : JSON.stringify(sessionErr)}`;
         console.error('[TestNotif] ❌', msg, sessionErr);
         setToast({ type: 'error', message: msg });
         return;
+      }
+
+      // ── 1.5. Mevcut cihazın FCM token'ını tazele / Supabase'e kaydet ─────
+      if (userId) {
+        console.log('[TestNotif] Mevcut cihaz FCM token tazeleniyor...');
+        const fcmRes = await getFCMToken(userId);
+        if (fcmRes.ok) {
+          console.log('[TestNotif] ✅ Cihaz FCM token güncellendi:', fcmRes.token.slice(0, 20) + '...');
+        } else {
+          console.warn('[TestNotif] ⚠️ FCM token alınamadı:', fcmRes.message);
+        }
       }
 
       // ── 2. Edge Function isteğini at ───────────────────────────────────────
@@ -135,13 +143,18 @@ export function TestNotificationButton() {
         return;
       }
 
-      // Başarılı
-      const successMsg = `✅ Test bildirimi ${data.sent}/${data.total} cihaza gönderildi!`;
+      // Başarılı cihaz listesi
+      const deviceNames = data.results
+        ?.filter(r => r.ok)
+        .map(r => r.device.slice(0, 30))
+        .join(', ') ?? '';
+
+      const successMsg = `✅ Test bildirimi ${data.sent}/${data.total} cihaza gönderildi!\n${deviceNames ? `Cihazlar: ${deviceNames}` : ''}`;
       console.log('[TestNotif]', successMsg, data.results);
       setToast({ type: 'success', message: successMsg });
 
-      // 5 saniye sonra sıfırla
-      setTimeout(() => setToast({ type: 'idle' }), 5000);
+      // 6 saniye sonra sıfırla
+      setTimeout(() => setToast({ type: 'idle' }), 6000);
 
     } catch (err) {
       // Catch edilemeyen son savunma hattı

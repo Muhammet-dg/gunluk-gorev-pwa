@@ -1,8 +1,11 @@
 import { createClient } from '@supabase/supabase-js';
 import type { Task } from '../types';
 
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL as string;
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY as string;
+const DEFAULT_SUPABASE_URL = 'https://ooeowjpmoxjzxtwqwvtk.supabase.co';
+const DEFAULT_SUPABASE_ANON_KEY = 'sb_publishable_4Lusd9avoZzeIygvaZMnug_mOdjIq31';
+
+const supabaseUrl = (import.meta.env.VITE_SUPABASE_URL as string | undefined) || DEFAULT_SUPABASE_URL;
+const supabaseAnonKey = (import.meta.env.VITE_SUPABASE_ANON_KEY as string | undefined) || DEFAULT_SUPABASE_ANON_KEY;
 
 // ─── tasks tablosu ───────────────────────────────────────────
 export type TaskRow = {
