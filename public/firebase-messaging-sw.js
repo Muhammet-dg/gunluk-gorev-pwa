@@ -37,26 +37,18 @@ const messaging = firebase.messaging();
  * manuel showNotification çağırıyoruz.
  */
 messaging.onBackgroundMessage((payload) => {
-  console.log('[FCM SW] Message received:', payload);
+  console.log('[FCM SW] Arka plan mesajı alındı:', payload);
 
-  // Eğer payload.notification varsa, Firebase SDK bildirimi zaten kendi otomatik basmıştır.
-  // Çift bildirimi önlemek için manuel showNotification'ı ATLA.
-  if (payload.notification) {
-    console.log('[FCM SW] Bildirim Firebase SDK tarafından otomatik gösteriliyor.');
-    return;
-  }
-
-  // Yalnızca "data-only" mesaj gelirse manuel bildirim göster
   const APP_NAME   = 'FlowDay';
-  const notifTitle = payload.data?.title ?? APP_NAME;
-  const notifBody  = payload.data?.body  ?? 'Yeni bir bildiriminiz var.';
-  const notifIcon  = payload.data?.icon  ?? '/icons/icon-192.png';
-  const notifBadge = payload.data?.badge ?? '/icons/icon-192.png';
+  const notifTitle = payload.notification?.title ?? payload.data?.title ?? APP_NAME;
+  const notifBody  = payload.notification?.body  ?? payload.data?.body  ?? 'Yeni bir bildiriminiz var.';
+  const notifIcon  = payload.notification?.icon  ?? payload.data?.icon  ?? '/icons/icon-192.png';
+  const notifBadge = payload.notification?.badge ?? payload.data?.badge ?? '/icons/icon-192.png';
   const targetUrl  = payload.data?.url   ?? '/';
   const taskId     = payload.data?.taskId ?? '';
   const priority   = payload.data?.priority ?? 'normal';
 
-  const tag = taskId ? `task-${taskId}` : 'flowday-fcm';
+  const tag = taskId ? `task-${taskId}` : (payload.notification?.tag || 'flowday-fcm');
 
   const notifOptions = {
     body:               notifBody,

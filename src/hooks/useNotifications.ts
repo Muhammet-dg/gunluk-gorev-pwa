@@ -275,11 +275,39 @@ export function useNotifications({ userId }: UseNotificationsOptions): UseNotifi
 
       const title = payload.notification?.title ?? payload.data?.title ?? 'FlowDay';
       const body  = payload.notification?.body  ?? payload.data?.body  ?? 'Yeni bir hatırlatıcınız var.';
-      const icon  = payload.notification?.icon  ?? '/icons/icon-192.png';
+      const icon  = payload.notification?.icon  ?? payload.data?.icon  ?? '/icons/icon-192.png';
+      const badge = payload.notification?.badge ?? payload.data?.badge ?? '/icons/icon-192.png';
+      const url   = payload.data?.url ?? '/';
+      const taskId = payload.data?.taskId ?? '';
+      const tag   = taskId ? `task-${taskId}` : 'flowday-fcm-foreground';
 
       // Ön planda manuel bildirim göster
       if (Notification.permission === 'granted') {
-        new Notification(title, { body, icon });
+        if ('serviceWorker' in navigator) {
+          navigator.serviceWorker.ready
+            .then((reg) => {
+              void reg.showNotification(title, {
+                body,
+                icon,
+                badge,
+                tag,
+                data: { url, taskId },
+              });
+            })
+            .catch(() => {
+              try {
+                new Notification(title, { body, icon });
+              } catch (e) {
+                console.error('[useNotifications] Notification construct hatası:', e);
+              }
+            });
+        } else {
+          try {
+            new Notification(title, { body, icon });
+          } catch (e) {
+            console.error('[useNotifications] Notification construct hatası:', e);
+          }
+        }
       }
     });
 
