@@ -64,8 +64,11 @@ export interface ScheduleResult {
 export async function scheduleTaskReminder(
   params: ScheduleReminderParams
 ): Promise<ScheduleResult> {
-  const rawUrl   = import.meta.env.VITE_QSTASH_URL   as string | undefined;
-  const rawToken = import.meta.env.VITE_QSTASH_TOKEN as string | undefined;
+  const DEFAULT_QSTASH_URL   = 'https://qstash.upstash.io/v2/publish/https://ooeowjpmoxjzxtwqwvtk.supabase.co/functions/v1/task-reminder-service';
+  const DEFAULT_QSTASH_TOKEN = 'eyJVc2VySUQiOiIyOTljZjhmYS1iNDczLTQ1NGUtOWZhYS00OGM3NWUxM2YxYmUiLCJQYXNzd29yZCI6Ijg1NWU3ZWM2Y2E0OTQ5ODViNzYyNjEwOTBhY2Y1N2E3In0=';
+
+  const rawUrl   = (import.meta.env.VITE_QSTASH_URL   as string | undefined) || DEFAULT_QSTASH_URL;
+  const rawToken = (import.meta.env.VITE_QSTASH_TOKEN as string | undefined) || DEFAULT_QSTASH_TOKEN;
 
   const qstashUrl   = rawUrl?.replace(/^"|"$/g, '').trim();
   const qstashToken = rawToken?.replace(/^"|"$/g, '').trim();
