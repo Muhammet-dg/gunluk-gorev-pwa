@@ -1,5 +1,6 @@
 import { createClient } from '@supabase/supabase-js';
 import type { Task } from '../types';
+import { decodeNoteAndCategory } from '../types';
 
 const DEFAULT_SUPABASE_URL = 'https://ooeowjpmoxjzxtwqwvtk.supabase.co';
 const DEFAULT_SUPABASE_ANON_KEY = 'sb_publishable_4Lusd9avoZzeIygvaZMnug_mOdjIq31';
@@ -74,11 +75,13 @@ export const supabase = createClient<Database>(supabaseUrl, supabaseAnonKey);
 
 // Supabase satırını uygulama Task tipine dönüştür
 export function rowToTask(row: TaskRow): Task {
+  const { note, category } = decodeNoteAndCategory(row.note, row.id, row.priority);
   return {
     id: row.id,
     title: row.title,
-    note: row.note ?? undefined,
+    note,
     priority: row.priority,
+    category,
     completed: row.completed,
     created_at: row.created_at,
     completed_at: row.completed_at ?? undefined,

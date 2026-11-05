@@ -29,64 +29,85 @@ export function BottomNav({ activeTab, onTabChange, activeCount, completedCount 
 
   return (
     <div
-      className="absolute bottom-0 left-0 right-0 border-t transition-colors duration-300 select-none"
+      className="absolute bottom-0 left-0 right-0 px-4 pointer-events-none select-none z-20"
       style={{
-        background: 'var(--nav-bg)',
-        borderColor: 'var(--border-strong)',
-        backdropFilter: 'blur(24px) saturate(180%)',
-        WebkitBackdropFilter: 'blur(24px) saturate(180%)',
-        /* ✅ pb-safe: iOS home indicator */
-        paddingBottom: 'env(safe-area-inset-bottom, 0px)',
+        paddingBottom: 'calc(0.75rem + env(safe-area-inset-bottom, 0px))',
       }}
     >
-      <div className="flex px-2 pt-1.5 pb-1">
-        {TABS.map(({ id, label, Icon }) => {
-          const isActive = activeTab === id;
-          const count = getCount(id);
-          return (
-            <button
-              key={id}
-              onClick={() => onTabChange(id)}
-              className="flex-1 flex flex-col items-center gap-0.5 py-2 rounded-2xl transition-all duration-200 active:scale-90 relative"
-            >
-              {/* Aktif tab: iOS pill background */}
-              {isActive && (
-                <div
-                  className="absolute inset-x-2 inset-y-1 rounded-xl"
-                  style={{ background: 'rgba(124,58,237,0.12)' }}
-                />
-              )}
+      <nav
+        aria-label="Alt navigasyon"
+        className="pointer-events-auto mx-auto max-w-sm rounded-2xl glass-nav px-2 py-1.5 shadow-2xl transition-all duration-300"
+        style={{
+          boxShadow: '0 12px 40px rgba(0, 0, 0, 0.42)',
+        }}
+      >
+        <div className="flex items-center justify-around">
+          {TABS.map(({ id, label, Icon }) => {
+            const isActive = activeTab === id;
+            const count = getCount(id);
 
-              <div className="relative z-10">
-                <Icon
-                  size={22}
-                  strokeWidth={isActive ? 2.2 : 1.6}
-                  className={`transition-all duration-200 ${isActive ? 'text-violet-400 scale-110' : 'text-app-muted'}`}
-                />
-                {count !== null && count > 0 && (
-                  <span
-                    className="absolute -top-1.5 -right-2 min-w-[16px] h-4 rounded-full text-white text-[9px] font-bold flex items-center justify-center leading-none px-0.5"
-                    style={{
-                      background: 'linear-gradient(135deg, #7c3aed, #6d28d9)',
-                      boxShadow: '0 2px 6px rgba(124,58,237,0.40)',
-                    }}
-                  >
-                    {count > 99 ? '99+' : count}
-                  </span>
-                )}
-              </div>
-
-              <span
-                className={`text-[10px] font-semibold transition-all duration-200 z-10 ${
-                  isActive ? 'text-violet-400' : 'text-app-muted opacity-70'
-                }`}
+            return (
+              <button
+                key={id}
+                onClick={() => onTabChange(id)}
+                className="flex-1 flex flex-col items-center justify-center gap-1 py-2 rounded-xl transition-all duration-200 active:scale-95 relative"
               >
-                {label}
-              </span>
-            </button>
-          );
-        })}
-      </div>
+                {/* Aktif Sekme Yüzey Vurgusu */}
+                {isActive && (
+                  <div
+                    className="absolute inset-x-2 inset-y-0.5 rounded-xl transition-all duration-300"
+                    style={{
+                      background: 'var(--primary-dim)',
+                    }}
+                  />
+                )}
+
+                <div className="relative z-10 flex items-center justify-center">
+                  <Icon
+                    size={20}
+                    strokeWidth={isActive ? 2.2 : 1.75}
+                    className={`transition-all duration-200 ${
+                      isActive ? 'text-indigo-400 -translate-y-0.5' : 'text-app-muted'
+                    }`}
+                  />
+
+                  {count !== null && count > 0 && (
+                    <span
+                      className="absolute -top-1.5 -right-2.5 min-w-[15px] h-[15px] rounded-full text-[9px] font-bold flex items-center justify-center leading-none px-1"
+                      style={{
+                        background: isActive ? 'var(--primary)' : 'var(--surface-2)',
+                        color: isActive ? '#ffffff' : 'var(--text-secondary)',
+                        border: '1px solid var(--border)',
+                      }}
+                    >
+                      {count > 99 ? '99+' : count}
+                    </span>
+                  )}
+                </div>
+
+                <span
+                  className={`text-[10px] font-semibold tracking-tight transition-all duration-200 z-10 ${
+                    isActive ? 'text-app-primary' : 'text-app-muted'
+                  }`}
+                >
+                  {label}
+                </span>
+
+                {/* Minimalist Işık / Nokta Göstergesi */}
+                {isActive && (
+                  <span
+                    className="w-1 h-1 rounded-full animate-scale-in"
+                    style={{
+                      background: '#818CF8',
+                      boxShadow: '0 0 8px #6366F1',
+                    }}
+                  />
+                )}
+              </button>
+            );
+          })}
+        </div>
+      </nav>
     </div>
   );
 }

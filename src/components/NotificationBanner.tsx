@@ -14,27 +14,27 @@ export function NotificationBanner({ status, onSubscribe, onDismiss }: Notificat
   if (isDenied) {
     return (
       <div
-        className="mx-4 mb-3 rounded-2xl px-4 py-3 flex items-center gap-3 animate-fade-in select-none"
+        className="mx-5 mb-3.5 rounded-2xl px-4 py-3 flex items-center gap-3 animate-fade-in select-none"
         style={{
-          background: 'rgba(239,68,68,0.08)',
-          border: '1px solid rgba(239,68,68,0.18)',
+          background: 'rgba(239, 68, 68, 0.08)',
+          border: '1px solid rgba(239, 68, 68, 0.16)',
         }}
       >
         <div
           className="w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0"
-          style={{ background: 'rgba(239,68,68,0.15)' }}
+          style={{ background: 'rgba(239, 68, 68, 0.14)' }}
         >
-          <BellOff size={14} className="text-rose-400" />
+          <BellOff size={14} className="text-red-400" />
         </div>
         <div className="flex-1 min-w-0">
-          <p className="text-rose-300 text-xs font-bold leading-none mb-0.5">İzin Reddedildi</p>
-          <p className="text-xs leading-snug" style={{ color: 'rgba(248,113,113,0.70)' }}>
-            Ayarlardan bildirim iznini açabilirsin.
+          <p className="text-red-300 text-xs font-bold leading-none mb-0.5">İzin Reddedildi</p>
+          <p className="text-[11px] leading-snug text-red-400/75">
+            Tarayıcı ayarlarından bildirim iznini açabilirsin.
           </p>
         </div>
         <button
           onClick={onDismiss}
-          className="text-rose-400/60 hover:text-rose-300 transition-colors active:scale-90 flex-shrink-0 p-1"
+          className="text-red-400/60 hover:text-red-300 transition-colors active:scale-90 flex-shrink-0 p-1"
           aria-label="Kapat"
         >
           <X size={14} />
@@ -45,58 +45,49 @@ export function NotificationBanner({ status, onSubscribe, onDismiss }: Notificat
 
   return (
     <div
-      className="mx-4 mb-3 rounded-2xl px-4 py-3 flex items-center gap-3 animate-fade-in select-none"
+      className="mx-5 mb-3.5 rounded-2xl px-4 py-3 flex items-center gap-3 animate-fade-in select-none"
       style={{
-        background: 'linear-gradient(135deg, rgba(124,58,237,0.12), rgba(99,102,241,0.08))',
-        border: '1px solid rgba(124,58,237,0.20)',
+        background: 'var(--surface)',
+        border: '1px solid var(--border-strong)',
       }}
     >
-      {/* Icon */}
       <div
         className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0"
         style={{
-          background: 'rgba(124,58,237,0.18)',
-          border: '1px solid rgba(124,58,237,0.20)',
+          background: 'var(--primary-dim)',
         }}
       >
-        <Bell size={15} className="text-violet-400" />
+        <Bell size={15} className="text-indigo-400" />
       </div>
 
-      {/* Text */}
       <div className="flex-1 min-w-0">
         <p className="text-app-primary text-xs font-bold leading-none mb-0.5">
           Hatırlatıcıları Aktif Et
         </p>
         <p className="text-app-secondary text-[11px] leading-snug">
-          Hiçbir görevi kaçırma.
+          Zamanı gelen görevler için anlık bildirim al.
         </p>
       </div>
 
-      {/* CTA */}
       <button
         id="notification-enable-btn"
         onClick={onSubscribe}
         disabled={isLoading}
-        className="flex-shrink-0 flex items-center gap-1.5 text-white text-xs font-bold px-3 py-1.5 rounded-xl transition-all duration-200 active:scale-90 disabled:opacity-50 disabled:cursor-not-allowed"
+        className="flex-shrink-0 flex items-center gap-1.5 text-white text-xs font-semibold px-3 py-1.5 rounded-xl transition-all duration-200 active:scale-90 disabled:opacity-50"
         style={{
-          background: 'linear-gradient(135deg, #7c3aed, #6d28d9)',
-          boxShadow: '0 4px 12px rgba(124,58,237,0.35)',
+          background: 'var(--primary)',
         }}
       >
         {isLoading ? (
           <>
             <Loader2 size={11} className="animate-spin" />
-            <span>Yükleniyor</span>
+            <span>Açılıyor</span>
           </>
         ) : (
-          <>
-            <Bell size={11} />
-            <span>Aç</span>
-          </>
+          <span>Etkinleştir</span>
         )}
       </button>
 
-      {/* Dismiss */}
       <button
         onClick={onDismiss}
         className="text-app-muted hover:text-app-secondary transition-colors active:scale-90 flex-shrink-0 -ml-1 p-1"

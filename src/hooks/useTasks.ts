@@ -1,33 +1,43 @@
 import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import type { Task, TaskFormData } from '../types';
+import { encodeNoteWithCategory, saveLocalCategory } from '../types';
 import type { Database } from '../lib/supabase';
 import { supabase, rowToTask } from '../lib/supabase';
 import { scheduleTaskReminder, cancelTaskReminder } from '../lib/qstash';
 
-type TaskInsert = Database['public']['Tables']['tasks']['Insert'];
 type TaskUpdate = Database['public']['Tables']['tasks']['Update'];
 
 // ─── Durum Tipleri ───────────────────────────────────────────
 type LoadingState = 'idle' | 'loading' | 'success' | 'error';
 
+export type TaskStats = {
+  total: number;
+  completed: number;
+  active: number;
+  highPriority: number;
+  mediumPriority: number;
+  lowPriority: number;
+  completionRate: number;
+};
+
 type UseTasksReturn = {
   tasks: Task[];
   activeTasks: Task[];
   completedTasks: Task[];
-  stats: {
-    total: number;
-    completed: number;
-    active: number;
-    highPriority: number;
-    completionRate: number;
-  };
+  archivedTasks: Task[];
+  stats: TaskStats;
   loading: LoadingState;
   isSubmitting: boolean;
   error: string | null;
   addTask: (data: TaskFormData) => Promise<void>;
   toggleTask: (id: string) => Promise<void>;
   deleteTask: (id: string) => Promise<void>;
+  snoozeTask: (id: string, mode?: '1h' | 'tomorrow') => Promise<void>;
   clearCompleted: () => Promise<void>;
+  restoreCompleted: () => Promise<void>;
+  archiveCompleted: () => Promise<void>;
+  restoreFromArchive: (id: string) => Promise<void>;
+  clearArchive: () => void;
   refetch: () => Promise<void>;
 };
 
@@ -36,9 +46,31 @@ type UseTasksOptions = {
   userId: string;
 };
 
+const ARCHIVE_STORAGE_PREFIX = 'flowday_archived_tasks_';
+
+function loadArchivedTasks(userId: string): Task[] {
+  if (!userId) return [];
+  try {
+    const raw = localStorage.getItem(`${ARCHIVE_STORAGE_PREFIX}${userId}`);
+    return raw ? (JSON.parse(raw) as Task[]) : [];
+  } catch {
+    return [];
+  }
+}
+
+function saveArchivedTasks(userId: string, list: Task[]): void {
+  if (!userId) return;
+  try {
+    localStorage.setItem(`${ARCHIVE_STORAGE_PREFIX}${userId}`, JSON.stringify(list));
+  } catch {
+    // ignore storage errors
+  }
+}
+
 // ─── Hook ────────────────────────────────────────────────────
 export function useTasks({ userId }: UseTasksOptions): UseTasksReturn {
   const [tasks, setTasks] = useState<Task[]>([]);
+  const [archivedTasks, setArchivedTasks] = useState<Task[]>(() => loadArchivedTasks(userId));
   const [loading, setLoading] = useState<LoadingState>('idle');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -48,9 +80,13 @@ export function useTasks({ userId }: UseTasksOptions): UseTasksReturn {
   // Görev silinince / tamamlanınca zamanlanmış mesajı iptal etmek için
   const qstashMessageIds = useRef<Map<string, string>>(new Map());
 
+  // Kullanıcı değiştiğinde arşivi yükle
+  useEffect(() => {
+    setArchivedTasks(loadArchivedTasks(userId));
+  }, [userId]);
+
   // ── Görevleri yükle ────────────────────────────────────────
   const fetchTasks = useCallback(async () => {
-    // Geçerli bir UUID yoksa isteği gönderme (400/401 hatalarını önle)
     if (!userId || userId.trim() === '') {
       console.warn('[useTasks] fetchTasks: userId henüz hazır değil, istek atlanıyor.');
       return;
@@ -62,7 +98,7 @@ export function useTasks({ userId }: UseTasksOptions): UseTasksReturn {
       const { data, error: fetchError } = await supabase
         .from('tasks')
         .select('*')
-        .eq('user_id', userId)            // ← Yalnızca bu kullanıcının görevleri
+        .eq('user_id', userId)
         .order('created_at', { ascending: false });
 
       if (fetchError) throw fetchError;
@@ -74,22 +110,19 @@ export function useTasks({ userId }: UseTasksOptions): UseTasksReturn {
       setLoading('error');
       console.error('[useTasks] fetchTasks:', err);
     }
-  }, [userId]);  // userId değişince fetchTasks yeniden oluşur
+  }, [userId]);
 
   // ── İlk yüklemede + realtime için ──────────────────────────
   useEffect(() => {
-    // Geçerli userId olmadan subscription veya fetch başlatma
     if (!userId || userId.trim() === '') {
       setTasks([]);
       setLoading('idle');
       return;
     }
 
-    setTasks([]);  // Kullanıcı değişince eski görevleri temizle
+    setTasks([]);
     void fetchTasks();
 
-    // Realtime subscription — başka sekmeden/cihazdan değişiklik gelirse anında güncelle
-    // filter: yalnızca bu kullanıcının görevlerini dinle
     const channel = supabase
       .channel(`tasks-realtime-${userId}`)
       .on(
@@ -97,8 +130,6 @@ export function useTasks({ userId }: UseTasksOptions): UseTasksReturn {
         { event: '*', schema: 'public', table: 'tasks', filter: `user_id=eq.${userId}` },
         (payload) => {
           if (payload.eventType === 'INSERT') {
-            // Optimistic update ile çakışmayı önle:
-            // ID zaten listede varsa (gerçek ID ile güncellendi) tekrar ekleme.
             setTasks((prev) => {
               const incoming = rowToTask(payload.new as Parameters<typeof rowToTask>[0]);
               const alreadyExists = prev.some((t) => t.id === incoming.id);
@@ -127,53 +158,51 @@ export function useTasks({ userId }: UseTasksOptions): UseTasksReturn {
 
   // ── Görev ekle ──────────────────────────────────────────────
   const addTask = useCallback(async (data: TaskFormData) => {
-    // ── Kullanıcı kimliği kontrolü ─────────────────────────────
-    // userId boş string veya tanımsızsa DB'ye geçersiz UUID göndermemek için dur.
     if (!userId || userId.trim() === '') {
       console.error('[useTasks] addTask: Geçerli bir kullanıcı oturumu bulunamadı, görev eklenemiyor.');
       setError('Görev eklemek için lütfen tekrar giriş yapın.');
       return;
     }
 
-    // Çift gönderimi önle
     if (isAddingRef.current) return;
     isAddingRef.current = true;
     setIsSubmitting(true);
+
+    const resolvedCategory = data.category ?? (data.priority === 'high' ? 'urgent' : 'personal');
+    const cleanNote = data.note.trim() || undefined;
+
     const optimisticTask: Task = {
       id: crypto.randomUUID(),
       title: data.title.trim(),
-      note: data.note.trim() || undefined,
+      note: cleanNote,
       priority: data.priority,
+      category: resolvedCategory,
       completed: false,
       created_at: new Date().toISOString(),
       reminder_time: data.reminder_time,
     };
 
+    saveLocalCategory(optimisticTask.id, resolvedCategory);
+
     // Optimistic update — anında UI'ya yansıt
     setTasks((prev) => [optimisticTask, ...prev]);
 
     try {
-      // ── Supabase tasks tablosunun temel sütunları ──────────────
-      // Tabloda kesinlikle var olan sütunlar:
-      //   id, title, note, priority, completed, created_at,
-      //   completed_at, user_id
-      // Bildirim sütunları (reminder_time, is_notified) tabloda
-      // yoksa 400 hatası verir — önce migration çalıştır.
+      const encodedNote = encodeNoteWithCategory(cleanNote, resolvedCategory);
+
       const insertPayload: Record<string, unknown> = {
         title:        optimisticTask.title,
-        note:         optimisticTask.note ?? null,
+        note:         encodedNote,
         priority:     optimisticTask.priority,
         completed:    false,
         completed_at: null,
-        user_id:      userId,   // ← Aktif kullanıcı ID'si (UUID kontrolü yukarıda yapıldı)
+        user_id:      userId,
       };
 
-      // reminder_time — tabloda bu sütun varsa ekle
       if (data.reminder_time !== undefined) {
         insertPayload['reminder_time'] = data.reminder_time;
       }
 
-      // is_notified — tabloda bu sütun varsa ekle
       insertPayload['is_notified'] = false;
 
       const { data: inserted, error: insertError } = await supabase
@@ -184,16 +213,14 @@ export function useTasks({ userId }: UseTasksOptions): UseTasksReturn {
 
       if (insertError) throw insertError;
 
-      // Gerçek id ve created_at ile optimistic task'i güncelle
       if (inserted) {
+        saveLocalCategory(inserted.id, resolvedCategory);
         const savedTask = rowToTask(inserted);
         setTasks((prev) =>
           prev.map((t) => (t.id === optimisticTask.id ? savedTask : t))
         );
 
         // ── QStash: Hatırlatıcı zamanlaması ────────────────────────────────
-        // Görev başarıyla kaydedildikten sonra, eğer reminder_time varsa
-        // QStash'e "Not-Before" zamanlı bir iş tanımla.
         if (savedTask.reminder_time) {
           scheduleTaskReminder({
             taskId:       savedTask.id,
@@ -202,13 +229,7 @@ export function useTasks({ userId }: UseTasksOptions): UseTasksReturn {
             priority:     savedTask.priority,
           }).then((result) => {
             if (result.ok && result.messageId) {
-              // messageId'yi sakla — silme/tamamlama sırasında iptal için
               qstashMessageIds.current.set(savedTask.id, result.messageId);
-              console.log(
-                `[useTasks] ✅ QStash zamanlandı: taskId=${savedTask.id}`,
-                `messageId=${result.messageId}`,
-                `scheduledAt=${result.scheduledAtUnix ? new Date(result.scheduledAtUnix * 1000).toLocaleString('tr-TR', { timeZone: 'Europe/Istanbul' }) : 'N/A'}`
-              );
             } else if (!result.ok) {
               console.error('[useTasks] ❌ QStash zamanlama başarısız:', result.error);
               setError(`Hatırlatıcı zamanlanamadı: ${result.error}`);
@@ -220,31 +241,14 @@ export function useTasks({ userId }: UseTasksOptions): UseTasksReturn {
         }
       }
     } catch (err: any) {
-      // Hata durumunda geri al
       setTasks((prev) => prev.filter((t) => t.id !== optimisticTask.id));
-
-      // ── Detaylı Supabase hata logu ─────────────────────────────
-      if (err?.message || err?.details || err?.hint || err?.code) {
-        console.error(
-          '[useTasks] Supabase addTask Hatası:',
-          '\n  message:', err.message,
-          '\n  details:', err.details,
-          '\n  hint:',    err.hint,
-          '\n  code:',    err.code
-        );
-      } else {
-        console.error('[useTasks] addTask:', err);
-      }
-
       const msg = err?.message ?? 'Görev eklenemedi';
       setError(msg);
     } finally {
-      // Her durumda flag'i serbest bırak
       isAddingRef.current = false;
       setIsSubmitting(false);
     }
-  }, [userId]);  // ← userId bağımlılığı: her zaman güncel ID'yi kullan
-
+  }, [userId]);
 
   // ── Görev tamamla / geri al ────────────────────────────────
   const toggleTask = useCallback(async (id: string) => {
@@ -253,6 +257,15 @@ export function useTasks({ userId }: UseTasksOptions): UseTasksReturn {
 
     const newCompleted = !task.completed;
     const newCompletedAt = newCompleted ? new Date().toISOString() : null;
+
+    // Haptic feedback (destekleyen mobil cihazlarda)
+    if (newCompleted && typeof navigator !== 'undefined' && 'vibrate' in navigator) {
+      try {
+        navigator.vibrate(15);
+      } catch {
+        // ignore
+      }
+    }
 
     // Optimistic update
     setTasks((prev) =>
@@ -263,11 +276,9 @@ export function useTasks({ userId }: UseTasksOptions): UseTasksReturn {
       )
     );
 
-    // Görev tamamlandıysa ve henüz bildirim gönderilmediyse QStash mesajını iptal et
     if (newCompleted) {
       const msgId = qstashMessageIds.current.get(id);
       if (msgId) {
-        console.log(`[useTasks] Görev tamamlandı, QStash mesajı iptal ediliyor: ${msgId}`);
         void cancelTaskReminder(msgId);
         qstashMessageIds.current.delete(id);
       }
@@ -285,7 +296,6 @@ export function useTasks({ userId }: UseTasksOptions): UseTasksReturn {
 
       if (updateError) throw updateError;
     } catch (err) {
-      // Geri al
       setTasks((prev) =>
         prev.map((t) =>
           t.id === id
@@ -295,7 +305,60 @@ export function useTasks({ userId }: UseTasksOptions): UseTasksReturn {
       );
       const msg = err instanceof Error ? err.message : 'Görev güncellenemedi';
       setError(msg);
-      console.error('[useTasks] toggleTask:', err);
+    }
+  }, [tasks]);
+
+  // ── Görev ertele (Snooze) ───────────────────────────────────
+  const snoozeTask = useCallback(async (id: string, mode: '1h' | 'tomorrow' = '1h') => {
+    const task = tasks.find((t) => t.id === id);
+    if (!task) return;
+
+    const now = new Date();
+    const targetDate = new Date(now);
+    if (mode === '1h') {
+      targetDate.setHours(targetDate.getHours() + 1);
+    } else {
+      targetDate.setDate(targetDate.getDate() + 1);
+      targetDate.setHours(9, 0, 0, 0);
+    }
+    const newReminderIso = targetDate.toISOString();
+
+    // Eski QStash mesajını iptal et
+    const oldMsgId = qstashMessageIds.current.get(id);
+    if (oldMsgId) {
+      void cancelTaskReminder(oldMsgId);
+      qstashMessageIds.current.delete(id);
+    }
+
+    // Optimistic update
+    setTasks((prev) =>
+      prev.map((t) => (t.id === id ? { ...t, reminder_time: newReminderIso } : t))
+    );
+
+    try {
+      const { error: updateError } = await supabase
+        .from('tasks')
+        .update({ reminder_time: newReminderIso, is_notified: false } as any)
+        .eq('id', id);
+
+      if (updateError) throw updateError;
+
+      void scheduleTaskReminder({
+        taskId:       task.id,
+        title:        task.title,
+        reminderTime: newReminderIso,
+        priority:     task.priority,
+      }).then((res) => {
+        if (res.ok && res.messageId) {
+          qstashMessageIds.current.set(task.id, res.messageId);
+        }
+      });
+    } catch (err) {
+      setTasks((prev) =>
+        prev.map((t) => (t.id === id ? { ...t, reminder_time: task.reminder_time } : t))
+      );
+      const msg = err instanceof Error ? err.message : 'Görev ertelenemedi';
+      setError(msg);
     }
   }, [tasks]);
 
@@ -303,15 +366,12 @@ export function useTasks({ userId }: UseTasksOptions): UseTasksReturn {
   const deleteTask = useCallback(async (id: string) => {
     const deleted = tasks.find((t) => t.id === id);
 
-    // Zamanlanmış QStash mesajını iptal et (henüz bildirim gönderilmemişse)
     const msgId = qstashMessageIds.current.get(id);
     if (msgId) {
-      console.log(`[useTasks] Görev siliniyor, QStash mesajı iptal ediliyor: ${msgId}`);
       void cancelTaskReminder(msgId);
       qstashMessageIds.current.delete(id);
     }
 
-    // Optimistic update
     setTasks((prev) => prev.filter((t) => t.id !== id));
 
     try {
@@ -322,11 +382,9 @@ export function useTasks({ userId }: UseTasksOptions): UseTasksReturn {
 
       if (deleteError) throw deleteError;
     } catch (err) {
-      // Geri al
       if (deleted) setTasks((prev) => [deleted, ...prev]);
       const msg = err instanceof Error ? err.message : 'Görev silinemedi';
       setError(msg);
-      console.error('[useTasks] deleteTask:', err);
     }
   }, [tasks]);
 
@@ -335,24 +393,100 @@ export function useTasks({ userId }: UseTasksOptions): UseTasksReturn {
     const toDelete = tasks.filter((t) => t.completed);
     if (toDelete.length === 0) return;
 
-    // Optimistic update
     setTasks((prev) => prev.filter((t) => !t.completed));
 
     try {
       const { error: deleteError } = await supabase
         .from('tasks')
         .delete()
+        .eq('user_id', userId)
         .eq('completed', true);
 
       if (deleteError) throw deleteError;
     } catch (err) {
-      // Geri al
       setTasks((prev) => [...toDelete, ...prev]);
       const msg = err instanceof Error ? err.message : 'Tamamlananlar temizlenemedi';
       setError(msg);
-      console.error('[useTasks] clearCompleted:', err);
     }
-  }, [tasks]);
+  }, [tasks, userId]);
+
+  // ── Tamamlananları Geri Yükle (Toplu) ──────────────────────
+  const restoreCompleted = useCallback(async () => {
+    const toRestore = tasks.filter((t) => t.completed);
+    if (toRestore.length === 0) return;
+
+    setTasks((prev) =>
+      prev.map((t) => (t.completed ? { ...t, completed: false, completed_at: undefined } : t))
+    );
+
+    try {
+      const { error: updateError } = await supabase
+        .from('tasks')
+        .update({ completed: false, completed_at: null } as any)
+        .eq('user_id', userId)
+        .eq('completed', true);
+
+      if (updateError) throw updateError;
+    } catch (err) {
+      setTasks((prev) =>
+        prev.map((t) => {
+          const orig = toRestore.find((r) => r.id === t.id);
+          return orig ? orig : t;
+        })
+      );
+      const msg = err instanceof Error ? err.message : 'Görevler geri yüklenemedi';
+      setError(msg);
+    }
+  }, [tasks, userId]);
+
+  // ── Tamamlananları Arşive Taşı ──────────────────────────────
+  const archiveCompleted = useCallback(async () => {
+    const toArchive = tasks.filter((t) => t.completed);
+    if (toArchive.length === 0) return;
+
+    const updatedArchive = [...toArchive, ...archivedTasks].slice(0, 100);
+    setArchivedTasks(updatedArchive);
+    saveArchivedTasks(userId, updatedArchive);
+
+    setTasks((prev) => prev.filter((t) => !t.completed));
+
+    try {
+      const { error: deleteError } = await supabase
+        .from('tasks')
+        .delete()
+        .eq('user_id', userId)
+        .eq('completed', true);
+
+      if (deleteError) throw deleteError;
+    } catch (err) {
+      setTasks((prev) => [...toArchive, ...prev]);
+      const msg = err instanceof Error ? err.message : 'Arşivleme başarısız oldu';
+      setError(msg);
+    }
+  }, [tasks, archivedTasks, userId]);
+
+  // ── Arşivden Geri Yükle ─────────────────────────────────────
+  const restoreFromArchive = useCallback(async (id: string) => {
+    const target = archivedTasks.find((t) => t.id === id);
+    if (!target) return;
+
+    const nextArchive = archivedTasks.filter((t) => t.id !== id);
+    setArchivedTasks(nextArchive);
+    saveArchivedTasks(userId, nextArchive);
+
+    await addTask({
+      title: target.title,
+      note: target.note ?? '',
+      priority: target.priority,
+      category: target.category,
+      reminder_time: null,
+    });
+  }, [archivedTasks, userId, addTask]);
+
+  const clearArchive = useCallback(() => {
+    setArchivedTasks([]);
+    saveArchivedTasks(userId, []);
+  }, [userId]);
 
   // ── Derived state ──────────────────────────────────────────
   const activeTasks = useMemo(() => tasks.filter((t) => !t.completed), [tasks]);
@@ -362,15 +496,26 @@ export function useTasks({ userId }: UseTasksOptions): UseTasksReturn {
     const total = tasks.length;
     const completed = completedTasks.length;
     const active = activeTasks.length;
-    const highPriority = activeTasks.filter((t) => t.priority === 'high').length;
+    const highPriority = tasks.filter((t) => t.priority === 'high').length;
+    const mediumPriority = tasks.filter((t) => t.priority === 'medium').length;
+    const lowPriority = tasks.filter((t) => t.priority === 'low').length;
     const completionRate = total > 0 ? Math.round((completed / total) * 100) : 0;
-    return { total, completed, active, highPriority, completionRate };
+    return {
+      total,
+      completed,
+      active,
+      highPriority,
+      mediumPriority,
+      lowPriority,
+      completionRate,
+    };
   }, [tasks, activeTasks, completedTasks]);
 
   return {
     tasks,
     activeTasks,
     completedTasks,
+    archivedTasks,
     stats,
     loading,
     isSubmitting,
@@ -378,7 +523,12 @@ export function useTasks({ userId }: UseTasksOptions): UseTasksReturn {
     addTask,
     toggleTask,
     deleteTask,
+    snoozeTask,
     clearCompleted,
+    restoreCompleted,
+    archiveCompleted,
+    restoreFromArchive,
+    clearArchive,
     refetch: fetchTasks,
   };
 }

@@ -1,68 +1,96 @@
 @import "tailwindcss";
 
 /* ══════════════════════════════════════════════════════════════
-   TEMA TOKEN SİSTEMİ
+   TEMA TOKEN SİSTEMİ — Sıcak / Otantik Editorial Tasarım Dili
    Tüm renkler burada tanımlanır; bileşenler yalnızca token kullanır.
    ══════════════════════════════════════════════════════════════ */
 
-/* ── Karanlık Tema (varsayılan) ─────────────────────────────── */
+/* ── Karanlık Tema (Varsayılan — Derin Grafit / Obsidyen) ───── */
 :root,
 [data-theme="dark"] {
-  --bg:          #0a0f1e;   /* koyu lacivert — premium dark */
-  --bg-2:        #0f172a;   /* slate-900 */
-  --surface:     #1a2235;   /* slate-850 benzeri */
-  --surface-2:   #1e293b;   /* slate-800 */
-  --surface-alt: rgba(26, 34, 53, 0.80);
-  --border:      rgba(51, 65, 85, 0.40);
-  --border-strong: rgba(71, 85, 105, 0.60);
+  --bg:            #0B0D13;   /* Derin grafit / obsidyen */
+  --bg-2:          #0E1117;   /* İkincil derin yüzey */
+  --surface:       #161922;   /* Kartlar için hafif yüzey yükseltisi (füme) */
+  --surface-2:     #1F2430;   /* İkincil kart / buton yüzeyi */
+  --surface-hover: #252B39;
+  --surface-alt:   rgba(22, 25, 34, 0.88);
 
-  --text-primary:   #f0f4ff;   /* soft white */
-  --text-secondary: #94a3b8;   /* slate-400 */
-  --text-muted:     #475569;   /* slate-600 */
-  --text-faint:     #2d3d54;   /* slate-750 benzeri */
+  /* %8 - %12 opaklıkta ince sınır çizgileri */
+  --border:        rgba(255, 255, 255, 0.08);
+  --border-strong: rgba(255, 255, 255, 0.12);
+  --border-focus:  rgba(99, 102, 241, 0.50);
 
-  --nav-bg:    rgba(10, 15, 30, 0.96);
-  --input-bg:  rgba(26, 34, 53, 0.90);
-  --sheet-bg:  #0f172a;
-  --overlay:   rgba(0, 0, 0, 0.70);
+  /* WCAG uyumlu tipografi kontrastları */
+  --text-primary:   #F3F4F6;   /* Kırık beyaz / yüksek okunabilirlik */
+  --text-secondary: #9CA3AF;   /* Dengeli gri-füme */
+  --text-muted:     #6B7280;   /* İkincil etiketler */
+  --text-faint:     #4B5563;   /* İnce detaylar */
 
-  --primary:       #7c3aed;   /* violet-600 */
-  --primary-light: #8b5cf6;   /* violet-500 */
-  --primary-dim:   rgba(124, 58, 237, 0.12);
-  --primary-glow:  rgba(124, 58, 237, 0.30);
+  /* Yüzen bar & modallar */
+  --nav-bg:    rgba(22, 25, 34, 0.82);
+  --input-bg:  rgba(22, 25, 34, 0.92);
+  --sheet-bg:  #12151E;
+  --overlay:   rgba(5, 6, 10, 0.75);
+
+  /* Vurgu (Accent) Renkleri — Rafine Tonlar */
+  --primary:       #6366F1;   /* Sıcak İndigo */
+  --primary-hover: #4F46E5;
+  --primary-light: #818CF8;
+  --primary-dim:   rgba(99, 102, 241, 0.12);
+  --primary-glow:  rgba(99, 102, 241, 0.28);
+
+  --success:       #10B981;   /* Adaçayı yeşili / zümrüt */
+  --success-light: #34D399;
+  --success-dim:   rgba(16, 185, 129, 0.12);
+
+  --priority-low:    #64748B; /* Yumuşak arduvaz mavisi */
+  --priority-medium: #F59E0B; /* Sıcak kehribar / amber */
+  --priority-high:   #EF4444; /* Kiremit / terrakotta kırmızısı */
 
   --safe-area-top:    env(safe-area-inset-top, 0px);
   --safe-area-bottom: env(safe-area-inset-bottom, 0px);
 }
 
-/* ── Aydınlık Tema ──────────────────────────────────────────── */
+/* ── Aydınlık Tema (Editorial Sıcak Kağıt / Taş Tonları) ────── */
 [data-theme="light"] {
-  --bg:          #f0f4ff;   /* hafif mavi-gri — daha taze */
-  --bg-2:        #e2e8f0;   /* slate-200 */
-  --surface:     #ffffff;
-  --surface-2:   #f8fafc;
-  --surface-alt: rgba(255, 255, 255, 0.90);
-  --border:      rgba(148, 163, 184, 0.35);
-  --border-strong: rgba(148, 163, 184, 0.55);
+  --bg:            #F7F6F2;   /* Sıcak editorial kağıt rengi */
+  --bg-2:          #EFECE6;   /* Taş / kum tonu */
+  --surface:       #FFFFFF;   /* Saf kart yüzeyi */
+  --surface-2:     #F2EFE9;   /* İkincil yüzey */
+  --surface-hover: #E8E4DC;
+  --surface-alt:   rgba(255, 255, 255, 0.92);
 
-  --text-primary:   #0f172a;   /* slate-900 */
-  --text-secondary: #475569;   /* slate-500 */
-  --text-muted:     #94a3b8;   /* slate-400 */
-  --text-faint:     #cbd5e1;   /* slate-300 */
+  --border:        rgba(17, 24, 39, 0.08);
+  --border-strong: rgba(17, 24, 39, 0.12);
+  --border-focus:  rgba(79, 70, 229, 0.45);
 
-  --nav-bg:    rgba(255, 255, 255, 0.96);
-  --input-bg:  rgba(248, 250, 252, 0.95);
-  --sheet-bg:  #ffffff;
-  --overlay:   rgba(0, 0, 0, 0.45);
+  --text-primary:   #111318;   /* Derin mürekkep siyahı (WCAG AAA) */
+  --text-secondary: #4B5563;   /* Koyu arduvaz */
+  --text-muted:     #6B7280;   /* Orta gri */
+  --text-faint:     #9CA3AF;   /* Açık gri */
 
-  --primary:       #6d28d9;
-  --primary-light: #7c3aed;
-  --primary-dim:   rgba(109, 40, 217, 0.10);
-  --primary-glow:  rgba(109, 40, 217, 0.20);
+  --nav-bg:    rgba(255, 255, 255, 0.88);
+  --input-bg:  #FFFFFF;
+  --sheet-bg:  #FAF9F6;
+  --overlay:   rgba(15, 18, 25, 0.45);
+
+  --primary:       #4F46E5;   /* Sıcak İndigo (Light kontrast) */
+  --primary-hover: #4338CA;
+  --primary-light: #6366F1;
+  --primary-dim:   rgba(79, 70, 229, 0.10);
+  --primary-glow:  rgba(79, 70, 229, 0.22);
+
+  --success:       #059669;
+  --success-light: #10B981;
+  --success-dim:   rgba(16, 185, 129, 0.12);
+
+  --priority-low:    #64748B;
+  --priority-medium: #D97706;
+  --priority-high:   #DC2626;
 }
 
 /* ══════════════════════════════════════════════════════════════
-   GLOBAL STILLER
+   GLOBAL STILLER & TİPOGRAFİ
    ══════════════════════════════════════════════════════════════ */
 
 * {
@@ -81,25 +109,26 @@ body,
   padding: 0;
   overscroll-behavior: none;
   background: var(--bg);
-  transition: background 0.3s ease;
+  transition: background-color 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 body {
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', system-ui, sans-serif;
+  font-family: 'Plus Jakarta Sans', 'Inter', -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   color: var(--text-primary);
+  letter-spacing: -0.01em;
 }
 
 /* ══════════════════════════════════════════════════════════════
-   YARDIMCI SINIFLAR (token tabanlı)
+   YARDIMCI SINIFLAR (Token Tabanlı)
    ══════════════════════════════════════════════════════════════ */
 
-/* Arkaplanlar */
-.bg-app        { background-color: var(--bg); }
-.bg-app-2      { background-color: var(--bg-2); }
-.bg-surface    { background-color: var(--surface); }
-.bg-surface-2  { background-color: var(--surface-2); }
+/* Arka planlar */
+.bg-app         { background-color: var(--bg); }
+.bg-app-2       { background-color: var(--bg-2); }
+.bg-surface     { background-color: var(--surface); }
+.bg-surface-2   { background-color: var(--surface-2); }
 .bg-surface-alt { background-color: var(--surface-alt); }
 
 /* Metinler */
@@ -125,7 +154,7 @@ body {
 }
 
 .pt-safe-14 {
-  padding-top: calc(3.5rem + env(safe-area-inset-top, 0px));
+  padding-top: calc(3.25rem + env(safe-area-inset-top, 0px));
 }
 
 .safe-area-bottom {
@@ -147,10 +176,11 @@ body {
   font-size: 0.875rem;
   font-weight: 600;
   color: #ffffff;
-  background: linear-gradient(135deg, #7c3aed, #6d28d9);
+  background: var(--primary);
   box-shadow: 0 8px 24px var(--primary-glow);
-  transition: all 0.2s ease;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
+.btn-primary:hover { background: var(--primary-hover); }
 .btn-primary:active { transform: scale(0.97); }
 .btn-primary:disabled { opacity: 0.45; cursor: not-allowed; box-shadow: none; }
 
@@ -161,13 +191,17 @@ body {
   justify-content: center;
   gap: 0.5rem;
   padding: 0.625rem 1rem;
-  border-radius: 0.75rem;
+  border-radius: 0.875rem;
   font-size: 0.75rem;
-  font-weight: 500;
+  font-weight: 600;
   color: var(--text-secondary);
   background: var(--surface);
-  border: 1px solid var(--border-strong);
-  transition: all 0.15s ease;
+  border: 1px solid var(--border);
+  transition: all 0.18s ease;
+}
+.btn-ghost:hover {
+  color: var(--text-primary);
+  border-color: var(--border-strong);
 }
 .btn-ghost:active { transform: scale(0.96); }
 
@@ -186,34 +220,287 @@ body {
 }
 .input-base::placeholder { color: var(--text-muted); }
 .input-base:focus {
-  border-color: rgba(124, 58, 237, 0.50);
-  box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.15);
+  border-color: var(--border-focus);
+  box-shadow: 0 0 0 3px var(--primary-dim);
 }
 
-/* Glass efekti */
+/* Subtle Glassmorphism efekti */
 .glass {
-  backdrop-filter: blur(16px) saturate(180%);
-  -webkit-backdrop-filter: blur(16px) saturate(180%);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
   background: var(--surface-alt);
   border: 1px solid var(--border);
+}
+
+.glass-nav {
+  backdrop-filter: blur(24px) saturate(190%);
+  -webkit-backdrop-filter: blur(24px) saturate(190%);
+  background: var(--nav-bg);
+  border: 1px solid var(--border-strong);
 }
 
 /* ══════════════════════════════════════════════════════════════
    SCROLLBAR
    ══════════════════════════════════════════════════════════════ */
 .overflow-y-auto,
+.overflow-x-auto,
 .scrollbar-none {
   scrollbar-width: none;
   -ms-overflow-style: none;
 }
 
 .overflow-y-auto::-webkit-scrollbar,
+.overflow-x-auto::-webkit-scrollbar,
 .scrollbar-none::-webkit-scrollbar {
   display: none;
 }
 
 /* ══════════════════════════════════════════════════════════════
-   ANİMASYONLAR
+   ARKA PLAN DİJİTAL YAĞMUR / NEON ANİMASYONU (animasyon.css)
+   ══════════════════════════════════════════════════════════════ */
+
+.rain-bg-container {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  --c: #6366f1;
+  background-color: transparent;
+  background-image:
+    radial-gradient(4px 100px at 0px 235px, var(--c), #0000),
+    radial-gradient(4px 100px at 300px 235px, var(--c), #0000),
+    radial-gradient(1.5px 1.5px at 150px 117.5px, var(--c) 100%, #0000 150%),
+    radial-gradient(4px 100px at 0px 252px, var(--c), #0000),
+    radial-gradient(4px 100px at 300px 252px, var(--c), #0000),
+    radial-gradient(1.5px 1.5px at 150px 126px, var(--c) 100%, #0000 150%),
+    radial-gradient(4px 100px at 0px 150px, var(--c), #0000),
+    radial-gradient(4px 100px at 300px 150px, var(--c), #0000),
+    radial-gradient(1.5px 1.5px at 150px 75px, var(--c) 100%, #0000 150%),
+    radial-gradient(4px 100px at 0px 253px, var(--c), #0000),
+    radial-gradient(4px 100px at 300px 253px, var(--c), #0000),
+    radial-gradient(1.5px 1.5px at 150px 126.5px, var(--c) 100%, #0000 150%),
+    radial-gradient(4px 100px at 0px 204px, var(--c), #0000),
+    radial-gradient(4px 100px at 300px 204px, var(--c), #0000),
+    radial-gradient(1.5px 1.5px at 150px 102px, var(--c) 100%, #0000 150%),
+    radial-gradient(4px 100px at 0px 134px, var(--c), #0000),
+    radial-gradient(4px 100px at 300px 134px, var(--c), #0000),
+    radial-gradient(1.5px 1.5px at 150px 67px, var(--c) 100%, #0000 150%),
+    radial-gradient(4px 100px at 0px 179px, var(--c), #0000),
+    radial-gradient(4px 100px at 300px 179px, var(--c), #0000),
+    radial-gradient(1.5px 1.5px at 150px 89.5px, var(--c) 100%, #0000 150%),
+    radial-gradient(4px 100px at 0px 299px, var(--c), #0000),
+    radial-gradient(4px 100px at 300px 299px, var(--c), #0000),
+    radial-gradient(1.5px 1.5px at 150px 149.5px, var(--c) 100%, #0000 150%),
+    radial-gradient(4px 100px at 0px 215px, var(--c), #0000),
+    radial-gradient(4px 100px at 300px 215px, var(--c), #0000),
+    radial-gradient(1.5px 1.5px at 150px 107.5px, var(--c) 100%, #0000 150%),
+    radial-gradient(4px 100px at 0px 281px, var(--c), #0000),
+    radial-gradient(4px 100px at 300px 281px, var(--c), #0000),
+    radial-gradient(1.5px 1.5px at 150px 140.5px, var(--c) 100%, #0000 150%),
+    radial-gradient(4px 100px at 0px 158px, var(--c), #0000),
+    radial-gradient(4px 100px at 300px 158px, var(--c), #0000),
+    radial-gradient(1.5px 1.5px at 150px 79px, var(--c) 100%, #0000 150%),
+    radial-gradient(4px 100px at 0px 210px, var(--c), #0000),
+    radial-gradient(4px 100px at 300px 210px, var(--c), #0000),
+    radial-gradient(1.5px 1.5px at 150px 105px, var(--c) 100%, #0000 150%);
+  background-size:
+    300px 235px, 300px 235px, 300px 235px,
+    300px 252px, 300px 252px, 300px 252px,
+    300px 150px, 300px 150px, 300px 150px,
+    300px 253px, 300px 253px, 300px 253px,
+    300px 204px, 300px 204px, 300px 204px,
+    300px 134px, 300px 134px, 300px 134px,
+    300px 179px, 300px 179px, 300px 179px,
+    300px 299px, 300px 299px, 300px 299px,
+    300px 215px, 300px 215px, 300px 215px,
+    300px 281px, 300px 281px, 300px 281px,
+    300px 158px, 300px 158px, 300px 158px,
+    300px 210px, 300px 210px, 300px 210px;
+  animation: rainFlow 130s linear infinite;
+  opacity: 0.65;
+  will-change: background-position;
+}
+
+[data-theme="light"] .rain-bg-container {
+  opacity: 0.16;
+  --c: #4f46e5;
+}
+
+.rain-bg-container::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background-image: radial-gradient(
+    circle at 50% 50%,
+    transparent 0,
+    transparent 2px,
+    rgba(11, 13, 19, 0.75) 2px
+  );
+  background-size: 8px 8px;
+  --f: blur(0.75em) brightness(4);
+  animation: rainHue 14s linear infinite;
+}
+
+[data-theme="light"] .rain-bg-container::after {
+  background-image: radial-gradient(
+    circle at 50% 50%,
+    transparent 0,
+    transparent 2px,
+    rgba(247, 246, 242, 0.70) 2px
+  );
+  --f: blur(0.5em) brightness(2.5);
+}
+
+@keyframes rainHue {
+  0% {
+    backdrop-filter: var(--f) hue-rotate(0deg);
+  }
+  to {
+    backdrop-filter: var(--f) hue-rotate(360deg);
+  }
+}
+
+@keyframes rainFlow {
+  0% {
+    background-position:
+      0px 220px, 3px 220px, 151.5px 337.5px,
+      25px 24px, 28px 24px, 176.5px 150px,
+      50px 16px, 53px 16px, 201.5px 91px,
+      75px 224px, 78px 224px, 226.5px 350.5px,
+      100px 19px, 103px 19px, 251.5px 121px,
+      125px 120px, 128px 120px, 276.5px 187px,
+      150px 31px, 153px 31px, 301.5px 120.5px,
+      175px 235px, 178px 235px, 326.5px 384.5px,
+      200px 121px, 203px 121px, 351.5px 228.5px,
+      225px 224px, 228px 224px, 376.5px 364.5px,
+      250px 26px, 253px 26px, 401.5px 105px,
+      275px 75px, 278px 75px, 426.5px 180px;
+  }
+  to {
+    background-position:
+      0px 6800px, 3px 6800px, 151.5px 6917.5px,
+      25px 13632px, 28px 13632px, 176.5px 13758px,
+      50px 5416px, 53px 5416px, 201.5px 5491px,
+      75px 17175px, 78px 17175px, 226.5px 17301.5px,
+      100px 5119px, 103px 5119px, 251.5px 5221px,
+      125px 8428px, 128px 8428px, 276.5px 8495px,
+      150px 9876px, 153px 9876px, 301.5px 9965.5px,
+      175px 13391px, 178px 13391px, 326.5px 13540.5px,
+      200px 14741px, 203px 14741px, 351.5px 14848.5px,
+      225px 18770px, 228px 18770px, 376.5px 18910.5px,
+      250px 5082px, 253px 5082px, 401.5px 5161px,
+      275px 6375px, 278px 6375px, 426.5px 6480px;
+  }
+}
+
+/* ══════════════════════════════════════════════════════════════
+   GÖREV TAMAMLAMA & ONAYLAMA EFEKTLERİ (Satisfaction & Delight)
+   ══════════════════════════════════════════════════════════════ */
+
+/* 1. Checkbox Elastik Yaylanma */
+@keyframes check-elastic {
+  0%   { transform: scale(1); }
+  25%  { transform: scale(0.82); }
+  50%  { transform: scale(1.18); }
+  75%  { transform: scale(0.95); }
+  100% { transform: scale(1); }
+}
+
+.animate-check-elastic {
+  animation: check-elastic 0.38s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+/* 2. Dışa Genişleyen Başarı Halkası (Ripple Wave) */
+@keyframes ripple-ring {
+  0% {
+    transform: scale(0.7);
+    opacity: 0.9;
+    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.6);
+  }
+  60% {
+    opacity: 0.5;
+  }
+  100% {
+    transform: scale(1.75);
+    opacity: 0;
+    box-shadow: 0 0 0 8px rgba(16, 185, 129, 0);
+  }
+}
+
+.animate-ripple-ring {
+  animation: ripple-ring 0.5s ease-out forwards;
+}
+
+/* 3. Tik İkonu Çizilme Animasyonu */
+@keyframes checkmark-draw {
+  0% {
+    stroke-dashoffset: 24;
+    opacity: 0;
+  }
+  30% {
+    opacity: 1;
+  }
+  100% {
+    stroke-dashoffset: 0;
+    opacity: 1;
+  }
+}
+
+.animate-checkmark-draw {
+  stroke-dasharray: 24;
+  stroke-dashoffset: 0;
+  animation: checkmark-draw 0.32s cubic-bezier(0.65, 0, 0.45, 1) forwards;
+}
+
+/* 4. Mikro Parçacık Patlaması (Sparkle Burst) */
+@keyframes sparkle-burst {
+  0% {
+    transform: translate(0, 0) scale(1);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(var(--tx, 14px), var(--ty, -14px)) scale(0);
+    opacity: 0;
+  }
+}
+
+.animate-sparkle-burst {
+  animation: sparkle-burst 0.45s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+/* 5. Kart Üzerinden Geçen Zümrüt Işık Dalgası */
+@keyframes complete-sheen {
+  0% {
+    transform: translateX(-100%);
+    opacity: 0;
+  }
+  40% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+}
+
+.animate-complete-sheen {
+  animation: complete-sheen 0.65s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+/* 6. Dinamik Strikethrough Çizgi Animasyonu */
+@keyframes strike-draw {
+  0%   { transform: scaleX(0); }
+  100% { transform: scaleX(1); }
+}
+
+.animate-strike-draw {
+  transform-origin: left center;
+  animation: strike-draw 0.3s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   DİĞER MİKRO-ANİMASYONLAR
    ══════════════════════════════════════════════════════════════ */
 
 @keyframes slide-up {
@@ -228,12 +515,12 @@ body {
 }
 
 .animate-slide-up {
-  animation: slide-up 0.34s cubic-bezier(0.32, 0.72, 0, 1) forwards;
+  animation: slide-up 0.36s cubic-bezier(0.22, 1, 0.36, 1) forwards;
 }
 
 @keyframes scale-in {
   from {
-    transform: scale(0.92) translateY(-6px);
+    transform: scale(0.94) translateY(-4px);
     opacity: 0;
   }
   to {
@@ -243,13 +530,13 @@ body {
 }
 
 .animate-scale-in {
-  animation: scale-in 0.2s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+  animation: scale-in 0.22s cubic-bezier(0.22, 1, 0.36, 1) forwards;
 }
 
 @keyframes task-in {
   from {
     opacity: 0;
-    transform: translateY(10px) scale(0.97);
+    transform: translateY(8px) scale(0.985);
   }
   to {
     opacity: 1;
@@ -258,13 +545,13 @@ body {
 }
 
 .animate-task-in {
-  animation: task-in 0.28s ease-out forwards;
+  animation: task-in 0.28s cubic-bezier(0.22, 1, 0.36, 1) forwards;
 }
 
 @keyframes fade-in {
   from {
     opacity: 0;
-    transform: translateY(-6px);
+    transform: translateY(-4px);
   }
   to {
     opacity: 1;
@@ -273,38 +560,42 @@ body {
 }
 
 .animate-fade-in {
-  animation: fade-in 0.28s ease-out forwards;
+  animation: fade-in 0.24s cubic-bezier(0.22, 1, 0.36, 1) forwards;
 }
 
 /* Float animasyonu — EmptyState için */
 @keyframes float {
   0%, 100% { transform: translateY(0px); }
-  50%       { transform: translateY(-8px); }
+  50%      { transform: translateY(-6px); }
 }
 
 .animate-float {
-  animation: float 3.5s ease-in-out infinite;
+  animation: float 4s ease-in-out infinite;
 }
 
 /* Tema geçiş animasyonu */
 @keyframes theme-spin {
-  from  { transform: rotate(0deg) scale(1); }
-  50%   { transform: rotate(180deg) scale(0.8); }
-  to    { transform: rotate(360deg) scale(1); }
+  from { transform: rotate(0deg) scale(1); }
+  50%  { transform: rotate(180deg) scale(0.82); }
+  to   { transform: rotate(360deg) scale(1); }
 }
 
 .animate-theme-toggle {
   animation: theme-spin 0.4s ease-in-out;
 }
 
-/* Shimmer / glow pulse */
-@keyframes glow-pulse {
-  0%, 100% { box-shadow: 0 0 16px var(--primary-glow); }
-  50%       { box-shadow: 0 0 28px var(--primary-glow), 0 0 8px rgba(124,58,237,0.15); }
+/* Odak modu nefes alma animasyonu */
+@keyframes breathe {
+  0%, 100% { transform: scale(1); opacity: 0.4; }
+  50%      { transform: scale(1.08); opacity: 0.75; }
+}
+
+.animate-breathe {
+  animation: breathe 4s ease-in-out infinite;
 }
 
 /* ══════════════════════════════════════════════════════════════
-   PWA STANDALONE
+   PWA STANDALONE & iOS ZOOM ENGELİ
    ══════════════════════════════════════════════════════════════ */
 @media (display-mode: standalone) {
   body {
@@ -312,11 +603,6 @@ body {
   }
 }
 
-/* ══════════════════════════════════════════════════════════════
-   iOS ZOOM ENGELİ
-   iOS Safari, font-size < 16px olan input/select/textarea
-   elemanlarına odaklanıldığında otomatik zoom yapar.
-   ══════════════════════════════════════════════════════════════ */
 @media screen and (max-width: 768px) {
   input,
   select,
