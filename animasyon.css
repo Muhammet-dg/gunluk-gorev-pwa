@@ -15,8 +15,8 @@ More comprehensive version at shenanigans.shoghisimon.ca/collection/css-rain-bg/
     hsl(0 0 4%) 2px
   );
   background-size: 8px 8px;
-  --f: blur(1em) brightness(6);
-  animation: hii 10s linear infinite;
+  --f: blur(1em) brightness(4.5);
+  animation: hii 28s linear infinite;
 }
 
 @keyframes hii {
@@ -83,7 +83,7 @@ More comprehensive version at shenanigans.shoghisimon.ca/collection/css-rain-bg/
     300px 281px, 300px 281px, 300px 281px,
     300px 158px, 300px 158px, 300px 158px,
     300px 210px, 300px 210px, 300px 210px;
-  animation: hi 45s linear infinite;
+  animation: hi 95s linear infinite;
 }
 
 @keyframes hi {
