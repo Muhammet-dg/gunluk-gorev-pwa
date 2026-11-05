@@ -143,8 +143,8 @@ function App() {
 
   // ── Oturum açık → Ana Uygulama ────────────────────────────────────────────
   return (
-    <div className="relative min-h-dvh h-dvh w-full bg-app flex items-center justify-center transition-colors duration-300 overflow-hidden">
-      {/* Kullanıcının verdiği animasyon.css / animasyon.html siber yağmur arka planı */}
+    <div className="relative min-h-dvh h-dvh w-full bg-transparent flex items-center justify-center overflow-hidden">
+      {/* Sitenin tam ekran animasyonlu arka planı (animasyon.css) */}
       <BackgroundAnimation />
 
       {/* Gün Tamamlandı Kutlama & Confetti */}
@@ -152,9 +152,9 @@ function App() {
         <Confetti streak={streak} onDismiss={dismissCelebration} />
       )}
 
-      {/* Mobil / PWA Çerçevesi */}
+      {/* Mobil / PWA Çerçevesi — Arka plan transparan, animasyon doğrudan görünür */}
       <div
-        className="relative w-full h-full sm:max-w-md sm:h-[93vh] sm:max-h-[900px] sm:rounded-[32px] sm:border bg-app/95 backdrop-blur-xl overflow-hidden flex flex-col transition-colors duration-300 select-none z-10"
+        className="relative w-full h-full sm:max-w-md sm:h-[93vh] sm:max-h-[900px] sm:rounded-[32px] sm:border bg-transparent overflow-hidden flex flex-col select-none z-10"
         style={{
           borderColor: 'var(--border-strong)',
           boxShadow: '0 24px 80px rgba(0, 0, 0, 0.65)',

@@ -8,17 +8,17 @@
 /* ── Karanlık Tema (Varsayılan — Derin Grafit / Obsidyen) ───── */
 :root,
 [data-theme="dark"] {
-  --bg:            #0B0D13;   /* Derin grafit / obsidyen */
-  --bg-2:          #0E1117;   /* İkincil derin yüzey */
-  --surface:       #161922;   /* Kartlar için hafif yüzey yükseltisi (füme) */
-  --surface-2:     #1F2430;   /* İkincil kart / buton yüzeyi */
-  --surface-hover: #252B39;
-  --surface-alt:   rgba(22, 25, 34, 0.88);
+  --bg:            #000000;   /* Saf derin zemin — animasyon için */
+  --bg-2:          #080a10;   /* İkincil derin yüzey */
+  --surface:       rgba(22, 25, 34, 0.75);   /* Cam dokulu füme kart yüzeyi */
+  --surface-2:     rgba(31, 36, 48, 0.78);   /* İkincil kart / buton yüzeyi */
+  --surface-hover: rgba(37, 43, 57, 0.85);
+  --surface-alt:   rgba(22, 25, 34, 0.80);
 
   /* %8 - %12 opaklıkta ince sınır çizgileri */
-  --border:        rgba(255, 255, 255, 0.08);
-  --border-strong: rgba(255, 255, 255, 0.12);
-  --border-focus:  rgba(99, 102, 241, 0.50);
+  --border:        rgba(255, 255, 255, 0.10);
+  --border-strong: rgba(255, 255, 255, 0.15);
+  --border-focus:  rgba(99, 102, 241, 0.55);
 
   /* WCAG uyumlu tipografi kontrastları */
   --text-primary:   #F3F4F6;   /* Kırık beyaz / yüksek okunabilirlik */
@@ -100,16 +100,21 @@
 }
 
 html,
-body,
-#root {
+body {
   width: 100%;
   height: 100%;
   min-height: 100dvh;
   margin: 0;
   padding: 0;
   overscroll-behavior: none;
-  background: var(--bg);
-  transition: background-color 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  background-color: #000;
+}
+
+#root {
+  width: 100%;
+  height: 100%;
+  min-height: 100dvh;
+  background: transparent;
 }
 
 body {
@@ -264,8 +269,8 @@ body {
   inset: 0;
   width: 100%;
   height: 100%;
-  --c: #6366f1;
-  background-color: transparent;
+  --c: #09f;
+  background-color: #000;
   background-image:
     radial-gradient(4px 100px at 0px 235px, var(--c), #0000),
     radial-gradient(4px 100px at 300px 235px, var(--c), #0000),
@@ -316,14 +321,9 @@ body {
     300px 281px, 300px 281px, 300px 281px,
     300px 158px, 300px 158px, 300px 158px,
     300px 210px, 300px 210px, 300px 210px;
-  animation: rainFlow 130s linear infinite;
-  opacity: 0.65;
+  animation: rainFlow 45s linear infinite;
+  opacity: 1;
   will-change: background-position;
-}
-
-[data-theme="light"] .rain-bg-container {
-  opacity: 0.16;
-  --c: #4f46e5;
 }
 
 .rain-bg-container::after {
@@ -335,21 +335,11 @@ body {
     circle at 50% 50%,
     transparent 0,
     transparent 2px,
-    rgba(11, 13, 19, 0.75) 2px
+    hsl(0 0 4%) 2px
   );
   background-size: 8px 8px;
-  --f: blur(0.75em) brightness(4);
-  animation: rainHue 14s linear infinite;
-}
-
-[data-theme="light"] .rain-bg-container::after {
-  background-image: radial-gradient(
-    circle at 50% 50%,
-    transparent 0,
-    transparent 2px,
-    rgba(247, 246, 242, 0.70) 2px
-  );
-  --f: blur(0.5em) brightness(2.5);
+  --f: blur(1em) brightness(6);
+  animation: rainHue 10s linear infinite;
 }
 
 @keyframes rainHue {

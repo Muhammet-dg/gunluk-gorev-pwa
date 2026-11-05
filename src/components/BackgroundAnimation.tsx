@@ -4,29 +4,17 @@ import React from 'react';
  * BackgroundAnimation
  * ─────────────────────────────────────────────────────────────────────────────
  * Kullanıcının sağladığı animasyon.css / animasyon.html tabanlı
- * siber yağmur / süzülen ışıltı parçacık efekti.
+ * siber yağmur / renk değiştiren dijital damlacık arka plan efekti.
  *
- * - Sayfanın arka planında derinlik hissi katar.
- * - İçerik okunabilirliğini korumak için uygun opaklık ve maske ile dengelenmiştir.
+ * Doğrudan sitenin en arkasına (tam ekrana) oturur ve kesintisiz akar.
  */
 export const BackgroundAnimation: React.FC = () => {
   return (
     <div
-      className="fixed inset-0 pointer-events-none z-0 overflow-hidden select-none transition-opacity duration-700"
+      className="fixed inset-0 pointer-events-none z-0 overflow-hidden select-none"
       aria-hidden="true"
     >
-      {/* Süzülen neon dijital yağmur arka planı */}
       <div className="rain-bg-container" />
-
-      {/* Ekran merkezinde ekstra derinlik ve okunabilirlik için vignette maskesi */}
-      <div
-        className="absolute inset-0 pointer-events-none"
-        style={{
-          background:
-            'radial-gradient(ellipse 90% 80% at 50% 50%, transparent 40%, var(--bg) 95%)',
-        }}
-      />
     </div>
   );
 };
-
